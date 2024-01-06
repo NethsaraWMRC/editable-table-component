@@ -11,58 +11,13 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 
-import SelectedBox from "./selectedLists";
 import EnhancedTableToolbar from "./EnhancedTableToolbar";
 import EnhancedTableHead from "./EnhancedTableHead";
 import EditableCell from "./EditableCell";
-
-const companyTypes = [
-  { id: 1, name: 'company 1' },
-  { id: 2, name: 'company 2' },
-  { id: 3, name: 'company 3' },
-  { id: 4, name: 'company 4' },
-];
-const sourceTypes = [
-  { id: 1, name: 'source 1' },
-  { id: 2, name: 'source 2' },
-  { id: 3, name: 'source 3' },
-  { id: 4, name: 'source 4' },
-];
+import AddData from "./AddData";
 
 
-
-let id = 0;
-function createData(leadName,company, email, phone, leadSource, leadOwner) {
-  id += 1;
-  return {
-    id,
-    leadName,
-    company: <SelectedBox data={companyTypes}/>, // Render the Companies component here
-    email,
-    phone,
-    leadSource:<SelectedBox data={sourceTypes}/>,
-    leadOwner,
-  };
-}
-
-const rows = [
-  createData("lead 1",companyTypes,"demoEmail1@gmail.com",777476351,sourceTypes,"owner 1"),
-  createData("lead 2",companyTypes,"demoEmail2@gmail.com",777476352,sourceTypes,"owner 2"),
-  createData("lead 3", companyTypes,"demoEmail3@gmail.com",777476353,sourceTypes,"owner 3"),
-  createData("lead 4",companyTypes, "demoEmail4@gmail.com",777476354,sourceTypes,"owner 4"),
-  createData("lead 5",companyTypes,"demoEmail5@gmail.com",777476355,sourceTypes,"owner 5"),
-  createData("lead 6",companyTypes,"demoEmail5@gmail.com",777476355,sourceTypes,"owner 6"),
-];
-
-const heads = [[
-  { id: 'leadName', label: 'Lead Name' },
-  { id: 'company', label: 'Company' },
-  { id: 'email', label: 'Email' },
-  { id: 'phone', label: 'Phone' },
-  { id: 'leadSource', label: 'Lead Source' },
-  { id: 'leadOwner', label: 'Lead Owner' },
-]]
-
+const rows = AddData // from AddData file
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -96,7 +51,7 @@ function stableSort(array, comparator) {
 
 // table-----------------------------------------------------------------------------------------------------------------------
 
-export default function DashTable() {
+export default function DashTable(props) {
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("calories");
   const [selected, setSelected] = React.useState([]);
@@ -122,6 +77,8 @@ export default function DashTable() {
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
+
+  // ... (functions for handling clicks) ...
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -152,6 +109,8 @@ export default function DashTable() {
     setOriginalValues({ ...originalValues, [rowId]: defaultValue });
   };
 
+  // ... (functions for handling ChangePage, ChangeRowsPerPage, ChangeDense) ...
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -171,6 +130,8 @@ export default function DashTable() {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
   
+
+   // ... (functions for handling inputs) ... 
 
     const handleInputChange = (event) => {
       setEditedValue(event.target.value);
@@ -210,7 +171,7 @@ export default function DashTable() {
     );
 
  
-//---------------------------------------------------------------------------------------------------------  
+// table rendering---------------------------------------------------------------------------------------------------------  
  
   return (
     <Box sx={{ width: "100%" }}>
@@ -234,7 +195,7 @@ export default function DashTable() {
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
-              columns={heads}
+              headCells={props.headers}
             />
             <TableBody>
               {visibleRows.map((row, index) => {
@@ -262,62 +223,30 @@ export default function DashTable() {
                         }}
                       />
                     </TableCell>
-                    <EditableCell
-                      rowId={row.id}
-                      columnId="leadName"
-                      value={row.leadName}
-                      editedValue={editedValue}
-                      editingCell={editingCell}
-                      handleCellClick={handleCellClick}
-                      handleInputChange={handleInputChange}
-                      handleInputBlur={handleInputBlur}
-                      handleInputKeyPress={handleInputKeyPress}
-                      alignText={'left'}
-                    />
+                
+                    {props.headers.map((header, headerIndex) => (
+                      <TableCell align="right" key={`${row.id}-${headerIndex}`} >
 
-                    <TableCell align="right">{row.company}</TableCell>
-                    
-                    <EditableCell
-                      rowId={row.id}
-                      columnId="email"
-                      value={row.email}
-                      editedValue={editedValue}
-                      editingCell={editingCell}
-                      handleCellClick={handleCellClick}
-                      handleInputChange={handleInputChange}
-                      handleInputBlur={handleInputBlur}
-                      handleInputKeyPress={handleInputKeyPress}
-                      alignText={'right'}
-                    />
+                        {typeof row[header.id] === 'object' ? (
+                          row[header.id] // If it's an object, assume it's the SelectedBox component
+                        ) : (
+                      
+                          <EditableCell
+                            rowId={row.id}
+                            columnId={header.id}
+                            value={row[header.id]}
+                            editedValue={editedValue}
+                            editingCell={editingCell}
+                            handleCellClick={handleCellClick}
+                            handleInputChange={handleInputChange}
+                            handleInputBlur={handleInputBlur}
+                            handleInputKeyPress={handleInputKeyPress}
+                            alignText={'right'}
+                          />
+                        )}
+                      </TableCell>
+                    ))}
 
-                    <EditableCell
-                      rowId={row.id}
-                      columnId="phone"
-                      value={row.phone}
-                      editedValue={editedValue}
-                      editingCell={editingCell}
-                      handleCellClick={handleCellClick}
-                      handleInputChange={handleInputChange}
-                      handleInputBlur={handleInputBlur}
-                      handleInputKeyPress={handleInputKeyPress}
-                      alignText={'right'}
-                    />
-
-                    <TableCell align="right">{row.leadSource}</TableCell>
-
-                    
-                      <EditableCell
-                        rowId={row.id}
-                        columnId="leadOwner"
-                        value={row.leadOwner}
-                        editedValue={editedValue}
-                        editingCell={editingCell}
-                        handleCellClick={handleCellClick}
-                        handleInputChange={handleInputChange}
-                        handleInputBlur={handleInputBlur}
-                        handleInputKeyPress={handleInputKeyPress}
-                        alignText={'right'}                 
-                      />
                   
 
                   </TableRow>

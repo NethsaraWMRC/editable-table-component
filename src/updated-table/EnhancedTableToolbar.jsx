@@ -1,6 +1,5 @@
 import { IconButton, Toolbar, Tooltip, Typography, alpha } from '@mui/material';
 import DeleteIcon from "@mui/icons-material/Delete";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import React from 'react';
 import PropTypes from 'prop-types';
 

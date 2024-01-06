@@ -20,7 +20,7 @@ const EditableCell = ({
         padding="none"
         onClick={() => handleCellClick(rowId, value, columnId)}
         align={alignText}
-        style={{paddingRight:'20px'}}
+        style={{borderWidth:0}}
   
       >
         {editedValue && editingCell.rowId === rowId && editingCell.columnId === columnId ? (
@@ -28,6 +28,7 @@ const EditableCell = ({
             style={{
                 padding:'5px',
                 borderRadius:"5px",
+                
                 outline: 'none',
                 
             }}

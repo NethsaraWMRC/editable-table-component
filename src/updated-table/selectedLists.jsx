@@ -1,7 +1,5 @@
-import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { Box, FormControl, MenuItem, Select } from "@mui/material";
 import React, { useState } from "react";
-import { css } from '@emotion/react';
-
   
   const colors = [
     {id:1,code:'#F4CE14'},
@@ -27,7 +25,7 @@ import { css } from '@emotion/react';
     };
   
     return (
-      <Box>
+      <Box sx={{ textAlign:'left'}} >
         <FormControl>
           <Select
             sx={{ s: 1, minWidth: 200 }}
@@ -37,6 +35,7 @@ import { css } from '@emotion/react';
                 selectedIndex !== -1
                   ? colors[selectedIndex % colors.length]?.code
                   : '',
+              
             }}
             value={selectedIndex}
             onChange={handleSelectChange}

@@ -2,46 +2,6 @@ import React from 'react'
 import { Box, Checkbox, TableCell, TableHead, TableRow, TableSortLabel } from '@mui/material';
 import { visuallyHidden } from "@mui/utils";
 
-
-const headCells = [
-    {
-      id: "leadName",
-      numeric: false,
-      disablePadding: true,
-      label: "Lead Name",
-    },
-    {
-      id: "company",
-      numeric: true,
-      disablePadding: false,
-      label: "Company",
-    },
-    {
-      id: "email",
-      numeric: true,
-      disablePadding: false,
-      label: "Email",
-    },
-    {
-      id: "phone",
-      numeric: true,
-      disablePadding: false,
-      label: "Phone",
-    },
-    {
-      id: "leadSource",
-      numeric: true,
-      disablePadding: false,
-      label: "Lead Source",
-    },
-    {
-      id: "leadOwner",
-      numeric: true,
-      disablePadding: false,
-      label: "Lead Owner",
-    },
-  ];
-
 function EnhancedTableHead(props) {
     const {
       onSelectAllClick,
@@ -50,11 +10,15 @@ function EnhancedTableHead(props) {
       numSelected,
       rowCount,
       onRequestSort,
+      headCells,
     } = props;
+    
     const createSortHandler = (property) => (event) => {
       onRequestSort(event, property);
     };
   
+    
+
     return (
       <TableHead>
         <TableRow>
@@ -72,7 +36,7 @@ function EnhancedTableHead(props) {
           {headCells.map((headCell) => (
             <TableCell
               key={headCell.id}
-              align={headCell.numeric ? "right" : "left"}
+              align='left'
               padding={headCell.disablePadding ? "none" : "normal"}
               sortDirection={orderBy === headCell.id ? order : false}
             >
