@@ -16,8 +16,11 @@ import EnhancedTableHead from "./EnhancedTableHead";
 import EditableCell from "./EditableCell";
 import AddData from "./AddData";
 
+// search bar
+import SearchBar from "./SearchBar";
+// search bar
 
-const rows = AddData // from AddData file
+const rows = AddData; // from AddData file
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -35,7 +38,6 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-
 function stableSort(array, comparator) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
@@ -48,10 +50,22 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-
 // table-----------------------------------------------------------------------------------------------------------------------
 
 export default function DashTable(props) {
+  const [searchQuery, setSearchQuery] = React.useState("");
+
+  React.useEffect(() => {
+    const filteredRows = rows.filter((row) =>
+      Object.values(row).some(
+        (value) =>
+          typeof value === "string" &&
+          value.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
+    setTableRows(filteredRows);
+  }, [searchQuery]);
+
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("calories");
   const [selected, setSelected] = React.useState([]);
@@ -59,12 +73,16 @@ export default function DashTable(props) {
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [editingCell, setEditingCell] = React.useState(null);
-  const [editedValue, setEditedValue] = React.useState('');
+  const [editedValue, setEditedValue] = React.useState("");
   const [tableRows, setTableRows] = React.useState(rows);
   const [editedRows, setEditedRows] = React.useState({});
   const [originalValues, setOriginalValues] = React.useState({});
-  
+
   // ... (functions for handling sorting, selection, delete,filter) ...
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
 
   const handleDelete = () => {
     const updatedRows = tableRows.filter((row) => !selected.includes(row.id));
@@ -92,14 +110,13 @@ export default function DashTable(props) {
   const handleClick = (event, id) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
-  
+
     if (selectedIndex === -1) {
       newSelected = [...selected, id]; // Add the clicked row to selection
     } else {
       newSelected = selected.filter((selectedId) => selectedId !== id); // Remove the clicked row from selection
     }
     setSelected(newSelected);
-    
   };
 
   const handleCellClick = (rowId, defaultValue, columnId) => {
@@ -129,58 +146,56 @@ export default function DashTable(props) {
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-  
 
-   // ... (functions for handling inputs) ... 
+  // ... (functions for handling inputs) ...
 
-    const handleInputChange = (event) => {
-      setEditedValue(event.target.value);
-    };
-  
-    const handleInputKeyPress = (event, rowId, columnId) => {
-      if (event.key === 'Enter') {
-        const updatedRows = tableRows.map((row) =>
-          row.id === rowId ? { ...row, [columnId]: editedValue } : row
-        );
-  
-        setTableRows(updatedRows);
-        setEditedValue('');
-        setEditingCell(null);
-        setEditedRows({ ...editedRows, [rowId]: false });
-      }
-    };
-  
-    const handleInputBlur = (event, rowId, columnId) => {
+  const handleInputChange = (event) => {
+    setEditedValue(event.target.value);
+  };
+
+  const handleInputKeyPress = (event, rowId, columnId) => {
+    if (event.key === "Enter") {
       const updatedRows = tableRows.map((row) =>
         row.id === rowId ? { ...row, [columnId]: editedValue } : row
       );
-  
+
       setTableRows(updatedRows);
-      setEditedValue('');
+      setEditedValue("");
       setEditingCell(null);
       setEditedRows({ ...editedRows, [rowId]: false });
-    };
-  
-    const visibleRows = React.useMemo(
-      () =>
-        stableSort(tableRows, getComparator(order, orderBy)).slice(
-          page * rowsPerPage,
-          page * rowsPerPage + rowsPerPage
-        ),
-      [order, orderBy, page, rowsPerPage, tableRows]
+    }
+  };
+
+  const handleInputBlur = (event, rowId, columnId) => {
+    const updatedRows = tableRows.map((row) =>
+      row.id === rowId ? { ...row, [columnId]: editedValue } : row
     );
 
- 
-// table rendering---------------------------------------------------------------------------------------------------------  
- 
-  return (
-    <Box sx={{ width: "100%" }}>
-      <Paper sx={{ width: "100%", mb: 2 }}>
+    setTableRows(updatedRows);
+    setEditedValue("");
+    setEditingCell(null);
+    setEditedRows({ ...editedRows, [rowId]: false });
+  };
 
-      <EnhancedTableToolbar
-        numSelected={selected.length}
-        handleDelete={handleDelete}
-      />
+  const visibleRows = React.useMemo(
+    () =>
+      stableSort(tableRows, getComparator(order, orderBy)).slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      ),
+    [order, orderBy, page, rowsPerPage, tableRows]
+  );
+
+  // table rendering---------------------------------------------------------------------------------------------------------
+
+  return (
+    <Box sx={{ width: "100%", marginLeft: "12.5%" }}>
+      <SearchBar value={searchQuery} onChange={handleSearchChange} />
+      <Paper sx={{ width: "100%", mb: 2 }}>
+        <EnhancedTableToolbar
+          numSelected={selected.length}
+          handleDelete={handleDelete}
+        />
 
         <TableContainer>
           <Table
@@ -213,7 +228,10 @@ export default function DashTable(props) {
                     selected={isItemSelected}
                     sx={{ cursor: "pointer" }}
                   >
-                    <TableCell padding="checkbox" onClick={(event) => event.stopPropagation()}>
+                    <TableCell
+                      padding="checkbox"
+                      onClick={(event) => event.stopPropagation()}
+                    >
                       <Checkbox
                         color="primary"
                         checked={isItemSelected}
@@ -223,14 +241,12 @@ export default function DashTable(props) {
                         }}
                       />
                     </TableCell>
-                
-                    {props.headers.map((header, headerIndex) => (
-                      <TableCell align="right" key={`${row.id}-${headerIndex}`} >
 
-                        {typeof row[header.id] === 'object' ? (
+                    {props.headers.map((header, headerIndex) => (
+                      <TableCell align="right" key={`${row.id}-${headerIndex}`}>
+                        {typeof row[header.id] === "object" ? (
                           row[header.id] // If it's an object, assume it's the SelectedBox component
                         ) : (
-                      
                           <EditableCell
                             rowId={row.id}
                             columnId={header.id}
@@ -241,14 +257,11 @@ export default function DashTable(props) {
                             handleInputChange={handleInputChange}
                             handleInputBlur={handleInputBlur}
                             handleInputKeyPress={handleInputKeyPress}
-                            alignText={'right'}
+                            alignText={"right"}
                           />
                         )}
                       </TableCell>
                     ))}
-
-                  
-
                   </TableRow>
                 );
               })}
