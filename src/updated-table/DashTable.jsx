@@ -15,54 +15,96 @@ import SelectedBox from "./selectedLists";
 import EnhancedTableToolbar from "./EnhancedTableToolbar";
 import EnhancedTableHead from "./EnhancedTableHead";
 import EditableCell from "./EditableCell";
+import SearchBar from "./SearchBar";
 
 const companyTypes = [
-  { id: 1, name: 'company 1' },
-  { id: 2, name: 'company 2' },
-  { id: 3, name: 'company 3' },
-  { id: 4, name: 'company 4' },
+  { id: 1, name: "company 1" },
+  { id: 2, name: "company 2" },
+  { id: 3, name: "company 3" },
+  { id: 4, name: "company 4" },
 ];
 const sourceTypes = [
-  { id: 1, name: 'source 1' },
-  { id: 2, name: 'source 2' },
-  { id: 3, name: 'source 3' },
-  { id: 4, name: 'source 4' },
+  { id: 1, name: "source 1" },
+  { id: 2, name: "source 2" },
+  { id: 3, name: "source 3" },
+  { id: 4, name: "source 4" },
 ];
 
-
-
 let id = 0;
-function createData(leadName,company, email, phone, leadSource, leadOwner) {
+function createData(leadName, company, email, phone, leadSource, leadOwner) {
   id += 1;
   return {
     id,
     leadName,
-    company: <SelectedBox data={companyTypes}/>, // Render the Companies component here
+    company: <SelectedBox data={companyTypes} />, // Render the Companies component here
     email,
     phone,
-    leadSource:<SelectedBox data={sourceTypes}/>,
+    leadSource: <SelectedBox data={sourceTypes} />,
     leadOwner,
   };
 }
 
 const rows = [
-  createData("lead 1",companyTypes,"demoEmail1@gmail.com",777476351,sourceTypes,"owner 1"),
-  createData("lead 2",companyTypes,"demoEmail2@gmail.com",777476352,sourceTypes,"owner 2"),
-  createData("lead 3", companyTypes,"demoEmail3@gmail.com",777476353,sourceTypes,"owner 3"),
-  createData("lead 4",companyTypes, "demoEmail4@gmail.com",777476354,sourceTypes,"owner 4"),
-  createData("lead 5",companyTypes,"demoEmail5@gmail.com",777476355,sourceTypes,"owner 5"),
-  createData("lead 6",companyTypes,"demoEmail5@gmail.com",777476355,sourceTypes,"owner 6"),
+  createData(
+    "lead 1",
+    companyTypes,
+    "demoEmail1@gmail.com",
+    777476351,
+    sourceTypes,
+    "owner 1"
+  ),
+  createData(
+    "lead 2",
+    companyTypes,
+    "demoEmail2@gmail.com",
+    777476352,
+    sourceTypes,
+    "owner 2"
+  ),
+  createData(
+    "lead 3",
+    companyTypes,
+    "demoEmail3@gmail.com",
+    777476353,
+    sourceTypes,
+    "owner 3"
+  ),
+  createData(
+    "lead 4",
+    companyTypes,
+    "demoEmail4@gmail.com",
+    777476354,
+    sourceTypes,
+    "owner 4"
+  ),
+  createData(
+    "lead 5",
+    companyTypes,
+    "demoEmail5@gmail.com",
+    777476355,
+    sourceTypes,
+    "owner 5"
+  ),
+  createData(
+    "lead 6",
+    companyTypes,
+    "demoEmail5@gmail.com",
+    777476355,
+    sourceTypes,
+    "owner 6"
+  ),
 ];
 
-const heads = [[
-  { id: 'leadName', label: 'Lead Name' },
-  { id: 'company', label: 'Company' },
-  { id: 'email', label: 'Email' },
-  { id: 'phone', label: 'Phone' },
-  { id: 'leadSource', label: 'Lead Source' },
-  { id: 'leadOwner', label: 'Lead Owner' },
-]]
-
+const heads = [
+  [
+    { id: "leadName", label: "Lead Name" },
+    { id: "company", label: "Company" },
+    { id: "email", label: "Email" },
+    { id: "phone", label: "Phone" },
+    { id: "leadSource", label: "Lead Source" },
+    { id: "leadOwner", label: "Lead Owner" },
+  ],
+];
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -80,7 +122,6 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-
 function stableSort(array, comparator) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
@@ -93,7 +134,6 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-
 // table-----------------------------------------------------------------------------------------------------------------------
 
 export default function DashTable() {
@@ -104,12 +144,16 @@ export default function DashTable() {
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [editingCell, setEditingCell] = React.useState(null);
-  const [editedValue, setEditedValue] = React.useState('');
+  const [editedValue, setEditedValue] = React.useState("");
   const [tableRows, setTableRows] = React.useState(rows);
   const [editedRows, setEditedRows] = React.useState({});
   const [originalValues, setOriginalValues] = React.useState({});
-  
+
   // ... (functions for handling sorting, selection, delete,filter) ...
+
+  // search
+  const [searchTerm, setSearchTerm] = React.useState("");
+  // search
 
   const handleDelete = () => {
     const updatedRows = tableRows.filter((row) => !selected.includes(row.id));
@@ -135,14 +179,13 @@ export default function DashTable() {
   const handleClick = (event, id) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
-  
+
     if (selectedIndex === -1) {
       newSelected = [...selected, id]; // Add the clicked row to selection
     } else {
       newSelected = selected.filter((selectedId) => selectedId !== id); // Remove the clicked row from selection
     }
     setSelected(newSelected);
-    
   };
 
   const handleCellClick = (rowId, defaultValue, columnId) => {
@@ -170,56 +213,63 @@ export default function DashTable() {
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-  
 
-    const handleInputChange = (event) => {
-      setEditedValue(event.target.value);
-    };
-  
-    const handleInputKeyPress = (event, rowId, columnId) => {
-      if (event.key === 'Enter') {
-        const updatedRows = tableRows.map((row) =>
-          row.id === rowId ? { ...row, [columnId]: editedValue } : row
-        );
-  
-        setTableRows(updatedRows);
-        setEditedValue('');
-        setEditingCell(null);
-        setEditedRows({ ...editedRows, [rowId]: false });
-      }
-    };
-  
-    const handleInputBlur = (event, rowId, columnId) => {
+  const handleInputChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleInputKeyPress = (event, rowId, columnId) => {
+    if (event.key === "Enter") {
       const updatedRows = tableRows.map((row) =>
         row.id === rowId ? { ...row, [columnId]: editedValue } : row
       );
-  
+
       setTableRows(updatedRows);
-      setEditedValue('');
+      setEditedValue("");
       setEditingCell(null);
       setEditedRows({ ...editedRows, [rowId]: false });
-    };
-  
-    const visibleRows = React.useMemo(
-      () =>
-        stableSort(tableRows, getComparator(order, orderBy)).slice(
-          page * rowsPerPage,
-          page * rowsPerPage + rowsPerPage
-        ),
-      [order, orderBy, page, rowsPerPage, tableRows]
+    }
+  };
+
+  const handleInputBlur = (event, rowId, columnId) => {
+    const updatedRows = tableRows.map((row) =>
+      row.id === rowId ? { ...row, [columnId]: editedValue } : row
     );
 
- 
-//---------------------------------------------------------------------------------------------------------  
- 
-  return (
-    <Box sx={{ width: "100%" }}>
-      <Paper sx={{ width: "100%", mb: 2 }}>
+    setTableRows(updatedRows);
+    setEditedValue("");
+    setEditingCell(null);
+    setEditedRows({ ...editedRows, [rowId]: false });
+  };
 
-      <EnhancedTableToolbar
-        numSelected={selected.length}
-        handleDelete={handleDelete}
-      />
+  const filteredRows = React.useMemo(
+    () =>
+      tableRows.filter((row) =>
+        row.leadName.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [tableRows, searchTerm]
+  );
+
+  const visibleRows = React.useMemo(
+    () =>
+      stableSort(filteredRows, getComparator(order, orderBy)).slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      ),
+    [order, orderBy, page, rowsPerPage, filteredRows]
+  );
+
+  //---------------------------------------------------------------------------------------------------------
+
+  return (
+    <Box sx={{ width: "100%", marginLeft: "15%" }}>
+      <Paper sx={{ width: "100%", mb: 2 }}>
+        <SearchBar value={searchTerm} onChange={handleInputChange} />
+
+        <EnhancedTableToolbar
+          numSelected={selected.length}
+          handleDelete={handleDelete}
+        />
 
         <TableContainer>
           <Table
@@ -252,7 +302,10 @@ export default function DashTable() {
                     selected={isItemSelected}
                     sx={{ cursor: "pointer" }}
                   >
-                    <TableCell padding="checkbox" onClick={(event) => event.stopPropagation()}>
+                    <TableCell
+                      padding="checkbox"
+                      onClick={(event) => event.stopPropagation()}
+                    >
                       <Checkbox
                         color="primary"
                         checked={isItemSelected}
@@ -272,11 +325,11 @@ export default function DashTable() {
                       handleInputChange={handleInputChange}
                       handleInputBlur={handleInputBlur}
                       handleInputKeyPress={handleInputKeyPress}
-                      alignText={'left'}
+                      alignText={"left"}
                     />
 
                     <TableCell align="right">{row.company}</TableCell>
-                    
+
                     <EditableCell
                       rowId={row.id}
                       columnId="email"
@@ -287,7 +340,7 @@ export default function DashTable() {
                       handleInputChange={handleInputChange}
                       handleInputBlur={handleInputBlur}
                       handleInputKeyPress={handleInputKeyPress}
-                      alignText={'right'}
+                      alignText={"right"}
                     />
 
                     <EditableCell
@@ -300,26 +353,23 @@ export default function DashTable() {
                       handleInputChange={handleInputChange}
                       handleInputBlur={handleInputBlur}
                       handleInputKeyPress={handleInputKeyPress}
-                      alignText={'right'}
+                      alignText={"right"}
                     />
 
                     <TableCell align="right">{row.leadSource}</TableCell>
 
-                    
-                      <EditableCell
-                        rowId={row.id}
-                        columnId="leadOwner"
-                        value={row.leadOwner}
-                        editedValue={editedValue}
-                        editingCell={editingCell}
-                        handleCellClick={handleCellClick}
-                        handleInputChange={handleInputChange}
-                        handleInputBlur={handleInputBlur}
-                        handleInputKeyPress={handleInputKeyPress}
-                        alignText={'right'}                 
-                      />
-                  
-
+                    <EditableCell
+                      rowId={row.id}
+                      columnId="leadOwner"
+                      value={row.leadOwner}
+                      editedValue={editedValue}
+                      editingCell={editingCell}
+                      handleCellClick={handleCellClick}
+                      handleInputChange={handleInputChange}
+                      handleInputBlur={handleInputBlur}
+                      handleInputKeyPress={handleInputKeyPress}
+                      alignText={"right"}
+                    />
                   </TableRow>
                 );
               })}
