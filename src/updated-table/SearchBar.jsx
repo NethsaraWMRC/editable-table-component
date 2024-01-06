@@ -1,17 +1,25 @@
 import React from "react";
-import { TextField } from "@mui/material";
+import { TextField, InputAdornment, InputLabel } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 
 export default function SearchBar({ value, onChange }) {
   return (
     <div>
       <TextField
-        id="filled-basic"
+        id="searchBar"
+        variant="outlined"
         label="Search"
-        variant="standard"
-        sx={{ marginLeft: "10%", width: "80%", marginTop: "20px" }}
+        sx={{ width: "80%", marginTop: "2%", marginLeft: "2%" }}
         color="warning"
         value={value} // Set the value prop
         onChange={onChange} // Set the onChange prop
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        }}
       />
     </div>
   );
